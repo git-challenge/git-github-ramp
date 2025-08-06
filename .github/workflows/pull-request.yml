@@ -1,0 +1,49 @@
+name: Check Git Flow Rules - PR
+
+on:
+  pull_request:
+    branches: ["main", "develop", "release-*"]
+    types: ["opened", "synchronize", "reopened"]
+  workflow_dispatch:
+
+jobs:
+  validate-gitflow-rules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Git Flow rules
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Branch names from PR
+          SOURCE_BRANCH="${{ github.event.pull_request.head.ref }}"
+          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+
+          echo "Validando GitFlow..."
+          echo "📌 PR source branch: $SOURCE_BRANCH"
+          echo "➡ PR target branch: $TARGET_BRANCH"
+
+          fail() {
+            echo "❌ ERROR: $1"
+            exit 1
+          }
+
+          # Rule #1: PR to main must come from "release-*" or "hotfix-*"
+          if [ "$TARGET_BRANCH" == "main" ]; then
+            if [[ ! "$SOURCE_BRANCH" =~ ^(release-|hotfix-) ]]; then
+              fail "PR hacia main debe provenir de release-* o hotfix-*"
+            fi
+          fi
+
+          # Rule #2: PR to "release-*" must come from develop
+          if [[ "$TARGET_BRANCH" =~ ^release- ]]; then
+            if [ "$SOURCE_BRANCH" != "develop" ]; then
+              fail "PR hacia release-* debe provenir de develop"
+            fi
+          fi
+
+          echo "✅ Git Flow: Todas las reglas pasan!"
