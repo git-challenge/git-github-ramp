@@ -20,8 +20,8 @@ jobs:
           set -euo pipefail
 
           # Branch names from PR
-          SOURCE_BRANCH="${{ github.event.pull_request.head.ref }}"
-          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+          SOURCE_BRANCH="${GITHUB_HEAD_REF}"
+          TARGET_BRANCH="${GITHUB_BASE_REF}"
 
           echo "Validando GitFlow..."
           echo "📌 PR source branch: $SOURCE_BRANCH"
