@@ -20,8 +20,8 @@ jobs:
           set -euo pipefail
 
           # Branch names from PR
-          SOURCE_BRANCH="${{ github.event.pull_request.head.ref }}"
-          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+          SOURCE_BRANCH="${GITHUB_HEAD_REF}"
+          TARGET_BRANCH="${GITHUB_BASE_REF}"
 
           echo "Validando GitFlow..."
           echo "📌 PR source branch: $SOURCE_BRANCH"
@@ -34,13 +34,13 @@ jobs:
 
           # Rule #1: PR to main must come from "release-*" or "hotfix-*"
           if [ "$TARGET_BRANCH" == "main" ]; then
-            if [[ ! "$SOURCE_BRANCH" =~ ^(release-|hotfix-) ]]; then
+            if [[ ! "$SOURCE_BRANCH" =~ ^(release-|release/|hotfix-|hotfix/) ]]; then
               fail "PR hacia main debe provenir de release-* o hotfix-*"
             fi
           fi
 
           # Rule #2: PR to "release-*" must come from develop
-          if [[ "$TARGET_BRANCH" =~ ^release- ]]; then
+          if [[ "$TARGET_BRANCH" =~ ^(release-|release/) ]]; then
             if [ "$SOURCE_BRANCH" != "develop" ]; then
               fail "PR hacia release-* debe provenir de develop"
             fi
