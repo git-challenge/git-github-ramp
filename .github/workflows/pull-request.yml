@@ -1,10 +1,12 @@
-name: Check Git Flow Rules - PR
+name: Check Git Flow Rules – PR
 
 on:
   pull_request:
-    branches: ["main", "develop", "release-*"]
+    branches: ["main", "develop", "release/*", "release-*"]
     types: ["opened", "synchronize", "reopened"]
-  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   validate-gitflow-rules:
@@ -19,7 +21,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Branch names from PR
           SOURCE_BRANCH="${GITHUB_HEAD_REF}"
           TARGET_BRANCH="${GITHUB_BASE_REF}"
 
@@ -32,14 +33,14 @@ jobs:
             exit 1
           }
 
-          # Rule #1: PR to main must come from "release-*" or "hotfix-*"
+          # Regla #1: PR hacia main solo desde release-* o hotfix-*
           if [ "$TARGET_BRANCH" == "main" ]; then
             if [[ ! "$SOURCE_BRANCH" =~ ^(release-|release/|hotfix-|hotfix/) ]]; then
               fail "PR hacia main debe provenir de release-* o hotfix-*"
             fi
           fi
 
-          # Rule #2: PR to "release-*" must come from develop
+          # Regla #2: PR hacia release/* solo desde develop
           if [[ "$TARGET_BRANCH" =~ ^(release-|release/) ]]; then
             if [ "$SOURCE_BRANCH" != "develop" ]; then
               fail "PR hacia release-* debe provenir de develop"
